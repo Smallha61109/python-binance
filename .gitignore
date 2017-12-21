@@ -1,0 +1,7 @@
+*
+!/LICENSE
+!*/
+!/binance/__init__.py
+!/binance/client.py
+!/binance/exceptions.py
+!/.gitignore

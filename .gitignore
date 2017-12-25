@@ -5,3 +5,4 @@
 !/binance/client.py
 !/binance/exceptions.py
 !/.gitignore
+!/setup.py

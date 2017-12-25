@@ -28,7 +28,7 @@ class Client:
   KLINE_INTERVAL_1WEEK = '1w'
   KLINE_INTERVAL_1MONTH = '1M'
 
-  def __init__(self, api_key, api_secret):
+  def __init__(self, api_key=None, api_secret=None):
     """Binance API Client constructor
     :param api_key: Api Key
     :type api_key: str.
@@ -36,19 +36,21 @@ class Client:
     :type api_secret: str.
     """
 
-    self.API_KEY = api_key
-    self.API_SECRET = api_secret.encode()
-    self.session = self._init_session()
+    self.session = requests.session()
+    headers = {'Accept': 'application/json', 'User-Agent': 'binance/python'}
+
+    if api_key is not None and api_secret is not None:
+      self.set_api_key(api_key, api_secret)
+      headers['X-MBX-APIKEY'] = self.API_KEY
+
+    self.session.headers.update(headers)
 
     # init DNS and SSL cert
     self.ping()
 
-  def _init_session(self):
-    session = requests.session()
-    session.headers.update({'Accept': 'application/json',
-                            'User-Agent': 'binance/python',
-                            'X-MBX-APIKEY': self.API_KEY})
-    return session
+  def set_api_key(self, api_key, api_secret):
+      self.API_KEY = api_key
+      self.API_SECRET = api_secret.encode()
 
   def signature(self, data):
     return hmac.new(self.API_SECRET, msg=data.encode(),
@@ -71,3 +73,11 @@ class Client:
 
   def account_into(self):
     return self.get_request('v3/account')
+
+  def klines(self, symbol, k, startTime, endTime):
+    return self.get_request('v1/klines', param={
+        'symbol': symbol,
+        'interval': k,
+        'startTime': int(startTime.timestamp() * 1000),
+        'endTime': int(endTime.timestamp() * 1000)}, sign=False)
+
